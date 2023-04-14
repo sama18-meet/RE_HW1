@@ -8,7 +8,7 @@ LC0:
 LC1:
 	.ascii "Enter your guess: \0"
 LC2:
-	.ascii "%c\0"
+	.ascii "%d\0"
 LC3:
 	.ascii "Too big, try again.\0"
 LC4:
@@ -41,30 +41,33 @@ _main:
 	sub	ecx, eax
 	mov	eax, ecx
 	add	eax, 1
-	mov	DWORD PTR [ebp-4], eax
+	mov	DWORD PTR [ebp-4], eax # [ebp-4] is the number chosen by program
 	mov	DWORD PTR [ebp-8], -1
-	mov	DWORD PTR [esp], OFFSET FLAT:LC0
+	mov	DWORD PTR [esp], OFFSET FLAT:LC0 # guess a number ...
 	call	_puts
 L6:
 	mov	DWORD PTR [esp], OFFSET FLAT:LC1
-	call	_printf
-	lea	eax, [ebp-8]
+	call	_printf # enter your guess
+	lea	eax, [ebp-8] # scanf arg 2 is addr of user input var
+	push eax
+	push OFFSET FLAT:LC2
 	call	_scanf
-	mov	eax, DWORD PTR [ebp-8]
+	add esp, 8
+	mov	eax, DWORD PTR [ebp-8] # eax = user input
 	cmp	eax, DWORD PTR [ebp-4]
 	jle	L2
-	mov	DWORD PTR [esp], OFFSET FLAT:LC3
+	mov	DWORD PTR [esp], OFFSET FLAT:LC3 #too big
 	call	_puts
-	jmp	L3
+	jmp	L6
 L2:
 	mov	eax, DWORD PTR [ebp-8]
 	cmp	eax, DWORD PTR [ebp-4]
-	jge	L4
-	mov	DWORD PTR [esp], OFFSET FLAT:LC4
+	jge	L4 # correct
+	mov	DWORD PTR [esp], OFFSET FLAT:LC4 # too small
 	call	_puts
-	jmp	L3
+	jmp	L6
 L4:
-	mov	DWORD PTR [esp], OFFSET FLAT:LC5
+	mov	DWORD PTR [esp], OFFSET FLAT:LC5 #correct
 	call	_puts
 L3:
 L8:
