@@ -27,26 +27,26 @@ _main:
 	call	___main
 	mov	DWORD PTR [esp], 0
 	call	_time
-	call	_rand
+	call	_rand # rand(void) - returns a random num between 0 and 32767
 	mov	ecx, 100
 	cdq
 	mov	DWORD PTR [esp], OFFSET FLAT:LC0
 	idiv	ecx
 	mov	DWORD PTR [ebp-12], -1
-	lea	ebx, [edx+1]
+	lea	ebx, [edx+1] 
 	call	_puts
 L2:
-	mov	DWORD PTR [esp], OFFSET FLAT:LC0
+	mov	DWORD PTR [esp], OFFSET FLAT:LC1 # First mistake mov DWORD PTR [esp], OFFSET FLAT:LC0 
 	call	_printf
 	mov	DWORD PTR [esp+4], esi
 	mov	DWORD PTR [esp], OFFSET FLAT:LC2
 	call	_scanf
 	cmp	ebx, DWORD PTR [ebp-12]
-	jge	L2
+	jge	L3 # Second mistake jge L2
 	mov	DWORD PTR [esp], OFFSET FLAT:LC3
 	jmp	L7
 L3:
-	jle	L5
+	je	L5 # Third mistake jle	L5
 	mov	DWORD PTR [esp], OFFSET FLAT:LC4
 L7:
 	call	_puts
