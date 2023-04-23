@@ -2,8 +2,6 @@
 	.intel_syntax noprefix
 	.def	___main;	.scl	2;	.type	32;	.endef
 	.section .rdata,"dr"
-LC1:
-	.ascii "%02d %02d %02d %02d %02d\12\0"
 	.text
 	.globl	_main
 	.def	_main;	.scl	2;	.type	32;	.endef
@@ -91,18 +89,33 @@ L2:
 	add esp, 0x10
 	cmp	eax, -1
 	jne	L6
+
+
 	mov	esi, DWORD PTR [esp+60]
 	mov	ebx, DWORD PTR [esp+56]
 	mov	ecx, DWORD PTR [esp+52]
 	mov	edx, DWORD PTR [esp+48]
 	mov	eax, DWORD PTR [esp+44]
-	mov	DWORD PTR [esp+20], esi
-	mov	DWORD PTR [esp+16], ebx
-	mov	DWORD PTR [esp+12], ecx
-	mov	DWORD PTR [esp+8], edx
-	mov	DWORD PTR [esp+4], eax
-	mov	DWORD PTR [esp], OFFSET FLAT:LC1
+
+	# "%02d %02d %02d %02d %02d\n\0"
+	push 0x0000000A # null, \n
+	push 0x64323025 # d, 2, 0, %
+	push 0x20643230 # space, d, 2 ,0
+	push 0x25206432 # %, space, d, 2
+	push 0x30252064 # 0, %, space, d
+	push 0x32302520 # 2, 0, %, space
+	push 0x64323025 # d, 2, 0, %
+	mov edi, esp
+
+	push esi
+	push ebx
+	push ecx
+	push edx
+	push eax
+	push edi
 	call	_printf
+	add esp, 0x34
+
 	mov	eax, 0
 	lea	esp, [ebp-8]
 	pop	ebx
