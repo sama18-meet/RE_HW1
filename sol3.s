@@ -2,8 +2,6 @@
 	.intel_syntax noprefix
 	.def	___main;	.scl	2;	.type	32;	.endef
 	.section .rdata,"dr"
-LC0:
-	.ascii " %[^\12]\0"
 LC1:
 	.ascii "%02d %02d %02d %02d %02d\12\0"
 	.text
@@ -84,9 +82,13 @@ L5:
 	mov	DWORD PTR [esp+60], eax
 L2:
 	lea	eax, [esp+32]
-	mov	DWORD PTR [esp+4], eax
-	mov	DWORD PTR [esp], OFFSET FLAT:LC0
+	push 0x00005D0A # null, null, ], \n
+	push 0x5E5B2520 # ^, [, %, space
+	mov ecx, esp
+	push eax
+	push ecx
 	call	_scanf
+	add esp, 0x10
 	cmp	eax, -1
 	jne	L6
 	mov	esi, DWORD PTR [esp+60]
