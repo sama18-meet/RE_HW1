@@ -20,8 +20,6 @@ LFB10:
 	.cfi_offset 6, -12
 	.cfi_offset 3, -16
 	call	___main
-	
-	
 		push 0x0       		# pushing null
 		push 0x41797261		# pushing A,y,r,a
 		push 0x7262694c		# pushing r,b,i,L
@@ -55,11 +53,21 @@ LFB10:
 		push esp            # push pointer for "printf"
 		push ebx            # push module handle for msvcrt
 
+		mov edx, eax		# edx = address of GetProcAddress
 		call eax            # call GetProcAddress(msvcrt, "printf")
 		add esp, 0x08       # clear stack (note arguments are cleared already)
-		# now eax contains the address of printf
-	
-	
+		mov ecx, eax		# ecx = printf address
+
+		push 0x00000066		# pushing null,f
+		push 0x6e616373		# pushing n,a,c,s
+		push esp            # push pointer for "scanf"
+		push ebx            # push module handle for msvcrt
+
+		call edx            # call GetProcAddress(msvcrt, "scanf")
+		add esp, 0x08       # clear stack (note arguments are cleared already)
+		mov edx, eax		# edx = scanf address
+		
+
 	mov	DWORD PTR [esp+44], 0
 	mov	DWORD PTR [esp+48], 0
 	mov	DWORD PTR [esp+52], 0
@@ -125,12 +133,10 @@ L2:
 	mov edi, esp
 	push eax
 	push edi
-	call	_scanf
+	call edx # scanf
 	add esp, 0x10
 	cmp	eax, -1
 	jne	L6
-
-
 
 	# "%02d %02d %02d %02d %02d\n\0"
 	push 0x0000000A # null, \n
@@ -154,7 +160,7 @@ L2:
 	push esi
 
 	push edi
-	call	_printf
+	call ecx # printf
 	add esp, 0x34
 
 	mov	eax, 0
@@ -168,6 +174,5 @@ L2:
 	.cfi_def_cfa 4, 4
 	ret
 	.cfi_endproc
-LFE10:
-	.def	_scanf;	.scl	2;	.type	32;	.endef
-	.def	_printf;	.scl	2;	.type	32;	.endef
+
+FindFunction:
