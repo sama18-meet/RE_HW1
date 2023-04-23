@@ -82,20 +82,15 @@ L2:
 	lea	eax, [esp+32]
 	push 0x00005D0A # null, null, ], \n
 	push 0x5E5B2520 # ^, [, %, space
-	mov ecx, esp
+	mov edi, esp
 	push eax
-	push ecx
+	push edi
 	call	_scanf
 	add esp, 0x10
 	cmp	eax, -1
 	jne	L6
 
 
-	mov	esi, DWORD PTR [esp+60]
-	mov	ebx, DWORD PTR [esp+56]
-	mov	ecx, DWORD PTR [esp+52]
-	mov	edx, DWORD PTR [esp+48]
-	mov	eax, DWORD PTR [esp+44]
 
 	# "%02d %02d %02d %02d %02d\n\0"
 	push 0x0000000A # null, \n
@@ -107,11 +102,17 @@ L2:
 	push 0x64323025 # d, 2, 0, %
 	mov edi, esp
 
+	mov	esi, DWORD PTR [esp+88]
 	push esi
-	push ebx
-	push ecx
-	push edx
-	push eax
+	mov	esi, DWORD PTR [esp+88]
+	push esi
+	mov	esi, DWORD PTR [esp+88]
+	push esi
+	mov	esi, DWORD PTR [esp+88]
+	push esi
+	mov	esi, DWORD PTR [esp+88]
+	push esi
+
 	push edi
 	call	_printf
 	add esp, 0x34
