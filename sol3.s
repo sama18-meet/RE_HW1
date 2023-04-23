@@ -20,6 +20,46 @@ LFB10:
 	.cfi_offset 6, -12
 	.cfi_offset 3, -16
 	call	___main
+	
+	
+		push 0x0       		# pushing null
+		push 0x41797261		# pushing A,y,r,a
+		push 0x7262694c		# pushing r,b,i,L
+		push 0x64616f4c		# pushing d,a,o,L
+		push esp            # push pointer for "LoadLibraryA"
+
+		call FindFunction   # call FindFunction("LoadLibraryA")
+		add esp, 0x14       # clear stack
+
+		push 0x00006c6c		# pushing null,l,l
+		push 0x642e7472		# pushing d,#,t,r
+		push 0x6376736d		# pushing c,v,s,m
+		push esp
+
+		call eax            # call LoadLibrary("msvcrt.dll")
+		add esp, 0x0c       # clear stack (note arguments are cleared already)
+
+		push eax            # store module handle for msvcrt
+		push 0x00007373		# pushing null,s,s
+		push 0x65726464		# pushing e,r,d,d
+		push 0x41636f72		# pushing A,c,o,r
+		push 0x50746547		# pushing P,t,e,G
+		push esp            # push pointer for "GetProcAddress"
+
+		call FindFunction   # call FindFunction("GetProcAddress")
+		add esp, 0x14       # clear stack
+		pop ebx             # restore module handle for msvcrt
+
+		push 0x00006674		# pushing null,f,t
+		push 0x6e697270		# pushing n,i,r,p
+		push esp            # push pointer for "printf"
+		push ebx            # push module handle for msvcrt
+
+		call eax            # call GetProcAddress(msvcrt, "printf")
+		add esp, 0x08       # clear stack (note arguments are cleared already)
+		# now eax contains the address of printf
+	
+	
 	mov	DWORD PTR [esp+44], 0
 	mov	DWORD PTR [esp+48], 0
 	mov	DWORD PTR [esp+52], 0
