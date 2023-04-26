@@ -3,7 +3,7 @@
 	.text
 	.globl	_arg
 	.bss
-	.align 4
+	.align 4	
 _arg:
 	.space 4
 	.comm	_mark, 64, 5
@@ -13,6 +13,12 @@ LC0:
 	.text
 	.globl	_check_error
 	.def	_check_error;	.scl	2;	.type	32;	.endef
+	
+_sqlite3_errmsg:
+_sqlite3_open:
+_sqlite3_exec:
+_sqlite3_close:	
+
 _check_error:
 	push	ebp
 	mov	ebp, esp
@@ -272,12 +278,12 @@ LC11:
 	.text
 	.globl	_handler
 	.def	_handler;	.scl	2;	.type	32;	.endef
-_handler:
+_handler: # dividing by zero or any othe non valid arithmetical operation will be enough to pass level 4 !
 	push	ebp
 	mov	ebp, esp
 	sub	esp, 8
-	mov	eax, DWORD PTR [ebp+8]
-	cmp	eax, 8
+	mov	eax, DWORD PTR [ebp+8] # eax = arg1
+	cmp	eax, 8 # if eax != 8 --> jmp to L20
 	jne	L20
 	mov	DWORD PTR [esp], OFFSET FLAT:LC10 # "Level 4 Passed!\0"
 	call	_puts # Print to STDOUT
@@ -308,14 +314,14 @@ __dummy_:
 	call	_puts
 	mov	DWORD PTR [esp], OFFSET FLAT:_mark 
 	call	__setjmp  # Save current enviromnet
-	mov	ecx, DWORD PTR _divider # ecx = random num
-	mov	eax, 236496 # eax - 236496
+	mov	ecx, DWORD PTR _divider # ecx = [80]
+	mov	eax, 236496 # eax = 236496
 	mov	edx, 0  # edx = 0
-	div	ecx # 236496 / rand num ==> edx = remainder, eax = integer
+	div	ecx # 236496 / [80] ==> edx = remainder, eax = integer
 	mov	DWORD PTR [ebp-4], eax # local var1 = eax
 	mov	eax, DWORD PTR [ebp-4] # eax = eax 
-	sal	eax, 3 # shift left by 3 bits
-	mov	DWORD PTR [ebp-8], eax  # local var2 = eax
+	sal	eax, 3 # shift left by 3 bits ==> eax = eax * 8
+	mov	DWORD PTR [ebp-8], eax  # local var2 = eax * 8
 	call	_db_access
 	mov	DWORD PTR [esp], 0
 	call	_exit
@@ -329,7 +335,7 @@ _printArray:
 	push	ebp
 	mov	ebp, esp
 	sub	esp, 12
-	mov	eax, DWORD PTR [ebp+12] # arg1 from main
+	mov	eax, DWORD PTR [ebp+12] # arg2 from main
 	mov	DWORD PTR [ebp-4], eax  # local1 = arg1 from main
 	jmp	L24
 L27:
@@ -445,11 +451,11 @@ L33:
 	and	eax, -4 
 	mov	DWORD PTR [ebp-20], eax # local5 = eax_input2 (with 00 at the end)
 	mov	eax, DWORD PTR [ebp-20]
-	mov	DWORD PTR [esp+8], eax # arg2 for printArray (local5) 
+	mov	DWORD PTR [esp+8], eax # arg1 for printArray (local5) 
 	mov	eax, DWORD PTR [ebp-16]
-	mov	DWORD PTR [esp+4], eax # arg1 for printArray (local4) 
+	mov	DWORD PTR [esp+4], eax # arg2 for printArray (local4) 
 	lea	eax, [ebp-37] 
-	mov	DWORD PTR [esp], eax # esp = ebp-37
+	mov	DWORD PTR [esp], eax # esp = ebp -37
 	call	_printArray # Prints array of numbers (I think its a machine code)
 	mov	eax, DWORD PTR [ebp-16] # eax = local4
 	mov	DWORD PTR [ebp-8], eax # local2 = local4
@@ -479,12 +485,12 @@ L41:
 	mov	eax, DWORD PTR [ebp-12]  # eax = j
 	add	eax, edx # eax = ebp - 37 +j
 	movzx	edx, BYTE PTR [eax] # edx = BYTE [ebp-37+j]
-	lea	ecx, [ebp-46] # ecx = 120904275
+	lea	ecx, [ebp-46] # ecx = 
 	mov	eax, DWORD PTR [ebp-12]  # eax = j
-	add	eax, ecx # eax = 120904275 + j 
-	movzx	eax, BYTE PTR [eax] # eax = BYTE from [120904275+j]
-	cmp	dl, al # compare BYTE [ebp-37+j] with BYTE from [120904275+j]  
-	jne	L44 # We need to make DWORD[ebp-37]=[120904275] 
+	add	eax, ecx # eax = ebp-46 + j 
+	movzx	eax, BYTE PTR [eax] # eax = BYTE from [ebp-46+j]
+	cmp	dl, al # compare BYTE [ebp-37+j] with BYTE from [ebp-46+j]  
+	jne	L44 # We need to make DWORD[ebp-37]=DWORD[ebp-46] 
 	add	DWORD PTR [ebp-12], 1 # j++
 L39:
 	cmp	DWORD PTR [ebp-12], 8 # loop  for 8 times 
@@ -510,7 +516,7 @@ _main:
 	call	___main # C/C++ initialization
 	mov	DWORD PTR [esp+4], OFFSET FLAT:_handler 
 	mov	DWORD PTR [esp], 8
-	call	_signal # Signal(8,handler)
+	call	_signal # Signal(8,handler) 8 = SIGFPE its trigered by non valid arithmetic operation (divide by 0 for example) 
 	mov	DWORD PTR [ebp-4], OFFSET FLAT:__dummy_ # Var 1 = pointer to __dummy
 	mov	eax, DWORD PTR [ebp+12] # eax = arg2
 	add	eax, 4 # eax = arg2+4
@@ -525,33 +531,33 @@ _main:
 	call	_level1 # level1 uses only first argument
 	mov	eax, DWORD PTR [ebp-8] # eax = local var2 = result of atoi = int eax
 	mov	DWORD PTR [esp], eax # pass eax to level2
-	call	_level2
-	mov	eax, DWORD PTR [ebp+12]
-	mov	eax, DWORD PTR [eax+8]
-	mov	DWORD PTR _arg, eax
-	mov	eax, DWORD PTR [ebp+12]
-	add	eax, 4
-	mov	eax, DWORD PTR [eax]
-	mov	DWORD PTR [esp], eax
+	call	_level2 # It uses argument for rand32 only
+	mov	eax, DWORD PTR [ebp+12] # eax = arg2
+	mov	eax, DWORD PTR [eax+8] # eax = [arg2+8]
+	mov	DWORD PTR _arg, eax # storing [arg2+8] in _arg  which defines a memory block (4 bytes)
+	mov	eax, DWORD PTR [ebp+12] # eax = arg2	
+	add	eax, 4 # eax = arg2 + 4
+	mov	eax, DWORD PTR [eax] # eax = [arg2+4]
+	mov	DWORD PTR [esp], eax # push [arg2+4] to atoi
 	call	_atoi
-	mov	DWORD PTR [ebp-8], eax
-	lea	eax, [ebp-8]
-	mov	DWORD PTR [esp], eax
+	mov	DWORD PTR [ebp-8], eax # [var2] = int [arg2+4]
+	lea	eax, [ebp-8] # eax = var2 
+	mov	DWORD PTR [esp], eax # push var2 to rand
 	call	_rand_32
 	cdq # sign extened content of eax into edx (probably it sets edx = 0)
 	shr	edx, 24 # shift right  to 24 bits
-	add	eax, edx  #
-	movzx	eax, al
-	sub	eax, edx
-	mov	edx, eax
-	mov	eax, edx
-	sar	eax, 31
-	shr	eax, 27
-	add	edx, eax
-	and	edx, 31
-	sub	edx, eax
-	mov	eax, edx
-	mov	DWORD PTR _divider, eax
+	add	eax, edx  # eax + 0 
+	movzx	eax, al # eax = al
+	sub	eax, edx # eax = eax - edx (0)
+	mov	edx, eax # edx = eax	 
+	mov	eax, edx # eax = eax = edx 
+	sar	eax, 31 # shift right 31 bits with preserving sign bit, LSB shifted to CF flag
+	shr	eax, 27 # shift right 27 bits, LSB shifted to CF flag, its either 0 or F	
+	add	edx, eax # eax + (F or 0)
+	and	edx, 31 # edx = edx and 0000000000011111 => keeps 5 LSB bits
+	sub	edx, eax #  edx - F or 0
+	mov	eax, edx # eax = edx - F or 0
+	mov	DWORD PTR _divider, eax # I think it tell to put eax at [80]
 	mov	eax, 0
 	leave
 	ret
