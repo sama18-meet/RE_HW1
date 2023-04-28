@@ -3,7 +3,7 @@
 	.text
 	.globl	_arg
 	.bss
-	.align 4	
+	.align 4
 _arg:
 	.space 4
 	.comm	_mark, 64, 5
@@ -13,7 +13,7 @@ LC0:
 	.text
 	.globl	_check_error
 	.def	_check_error;	.scl	2;	.type	32;	.endef
-	
+
 _sqlite3_errmsg:
 _sqlite3_open:
 _sqlite3_exec:
@@ -140,48 +140,48 @@ LC9:
 _db_access:
 	push	ebp
 	mov	ebp, esp
-	push	edi
-	sub	esp, 292
+	push	edi # esp - 4
+	sub	esp, 292 # 73 var
 	mov	DWORD PTR [ebp-16], 0
 	mov	DWORD PTR [ebp-8], OFFSET FLAT:LC7
-	lea	eax, [ebp-16]
-	mov	DWORD PTR [esp+4], eax
+	lea	eax, [ebp-16] # eax = ebp - 16
+	mov	DWORD PTR [esp+4], eax 
 	mov	DWORD PTR [esp], OFFSET FLAT:LC8
-	call	_sqlite3_open
+	call	_sqlite3_open # _sqlite3_open(users.db\0, 4)
 	test	eax, eax
-	jne	L13
+	jne	L13 # if eax != 0 --> jump 
 	mov	DWORD PTR [ebp-276], 0
-	lea	edx, [ebp-272]
-	mov	eax, 0
-	mov	ecx, 63
-	mov	edi, edx
-	rep stosd
-	mov	eax, DWORD PTR [ebp-8]
-	mov	DWORD PTR [esp+4], eax
+	lea	edx, [ebp-272] # edx = ebp -272
+	mov	eax, 0 # eax = 0
+	mov	ecx, 63 # ecx = 63
+	mov	edi, edx # edi = ebp -272
+	rep stosd # 63 blocks starting from ebp -272 will be 0
+	mov	eax, DWORD PTR [ebp-8] # eax = select username, password from users where username='\0 
+	mov	DWORD PTR [esp+4], eax 
 	lea	eax, [ebp-276]
 	mov	DWORD PTR [esp], eax
-	call	_strcat
-	mov	eax, DWORD PTR _arg
+	call	_strcat # strcat(dest = ebp - 276, source = select username, password from users where username='\0 )
+	mov	eax, DWORD PTR _arg # eax = [arg2+8] from main 
 	mov	DWORD PTR [esp+8], 11
 	mov	DWORD PTR [esp+4], eax
 	lea	eax, [ebp-276]
 	mov	DWORD PTR [esp], eax
-	call	_strncat
-	lea	eax, [ebp-276]
-	mov	ecx, -1
-	mov	edx, eax
-	mov	eax, 0
-	mov	edi, edx
-	repnz scasb
-	mov	eax, ecx
-	not	eax
-	lea	edx, [eax-1]
-	lea	eax, [ebp-276]
-	add	eax, edx
-	mov	WORD PTR [eax], 39
-	mov	eax, DWORD PTR [ebp-16]
-	lea	edx, [ebp-20]
-	mov	DWORD PTR [esp+16], edx
+	call	_strncat # strncat(destination = ebp -276, source = eax, 11);
+	lea	eax, [ebp-276] # eax = select username, password from users where username= 11 characters from eax
+	mov	ecx, -1 # ecx = -1	
+	mov	edx, eax # edx = eax
+	mov	eax, 0 # eax = 0
+	mov	edi, edx # edi = eax
+	repnz scasb # ecx = -strlen(edi)+1
+	mov	eax, ecx # eax = ecx 
+	not	eax # eax = ~eax
+	lea	edx, [eax-1]  # edx = strlen(edi)
+	lea	eax, [ebp-276] #  eax = ebp -276
+	add	eax, edx # ebp - 276 + strlen(edi)
+	mov	WORD PTR [eax], 39 # write to byte of [eax] = 39
+	mov	eax, DWORD PTR [ebp-16] # eax = 0
+	lea	edx, [ebp-20] # edx = ebp - 20
+	mov	DWORD PTR [esp+16], edx 
 	mov	DWORD PTR [esp+12], 0
 	mov	DWORD PTR [esp+8], OFFSET FLAT:_select_callback
 	lea	edx, [ebp-276]
@@ -282,21 +282,21 @@ _handler: # dividing by zero or any othe non valid arithmetical operation will b
 	push	ebp
 	mov	ebp, esp
 	sub	esp, 8
-	mov	eax, DWORD PTR [ebp+8] # eax = arg1
+	mov	eax, DWORD PTR [ebp+8] # eax = arg1 
 	cmp	eax, 8 # if eax != 8 --> jmp to L20
 	jne	L20
 	mov	DWORD PTR [esp], OFFSET FLAT:LC10 # "Level 4 Passed!\0"
 	call	_puts # Print to STDOUT
-	lea	eax, [ebp+8] # eax = Arg1
-	mov	DWORD PTR [esp], eax 
-	call	_rand_32 # Assume that this returns random number
-	mov	DWORD PTR _divider, eax # 0x00000050 = random number 
-	mov	DWORD PTR [esp+4], -1 # eip = -1 ?????? (second argument for longjmp)
-	mov	DWORD PTR [esp], OFFSET FLAT:_mark 
+	lea	eax, [ebp+8] # eax = ebp+8
+	mov	DWORD PTR [esp], eax # push epb + 8
+	call	_rand_32 # 
+	mov	DWORD PTR _divider, eax # 0x00000080 = eax 
+	mov	DWORD PTR [esp+4], -1
+	mov	DWORD PTR [esp], OFFSET FLAT:_mark
 	call	_longjmp # void longjmp(jmp_buf environment, int value) jump to set jump point and return -1
 L20:
 	mov	DWORD PTR [esp], OFFSET FLAT:LC11 # "Points will be reduced\0" - Only if we mess somehow with the signal
-	call	_puts # Print to STDOUT
+	call	_puts
 	nop
 	leave
 	ret
@@ -311,13 +311,13 @@ __dummy_:
 	mov	ebp, esp
 	sub	esp, 12
 	mov	DWORD PTR [esp], OFFSET FLAT:LC12 # "Level 3 Passed!\0"
-	call	_puts
-	mov	DWORD PTR [esp], OFFSET FLAT:_mark 
-	call	__setjmp  # Save current enviromnet
+	call	_puts	
+	mov	DWORD PTR [esp], OFFSET FLAT:_mark
+	call	__setjmp  # Save current enviromnet - FAIILING HERE
 	mov	ecx, DWORD PTR _divider # ecx = [80]
 	mov	eax, 236496 # eax = 236496
 	mov	edx, 0  # edx = 0
-	div	ecx # 236496 / [80] ==> edx = remainder, eax = integer
+	div	ecx # 236496 / [80] ==> edx = remainder, eax = integer 
 	mov	DWORD PTR [ebp-4], eax # local var1 = eax
 	mov	eax, DWORD PTR [ebp-4] # eax = eax 
 	sal	eax, 3 # shift left by 3 bits ==> eax = eax * 8
@@ -335,8 +335,8 @@ _printArray:
 	push	ebp
 	mov	ebp, esp
 	sub	esp, 12
-	mov	eax, DWORD PTR [ebp+12] # arg2 from main
-	mov	DWORD PTR [ebp-4], eax  # local1 = arg1 from main
+	mov	eax, DWORD PTR [ebp+12]
+	mov	DWORD PTR [ebp-4], eax
 	jmp	L24
 L27:
 	mov	eax, DWORD PTR [ebp-4]
@@ -364,9 +364,9 @@ L25:
 L26:
 	add	DWORD PTR [ebp-4], 4
 L24:
-	mov	eax, DWORD PTR [ebp-4]  # eax = arg1 from main
-	cmp	eax, DWORD PTR [ebp+16] # arg2 from main 
-	jb	L27 # jmp if arg1 from main < arg2 from main
+	mov	eax, DWORD PTR [ebp-4]
+	cmp	eax, DWORD PTR [ebp+16]
+	jb	L27
 	nop
 	nop
 	leave
@@ -381,8 +381,8 @@ _level1:
 	push	ebp
 	mov	ebp, esp
 	sub	esp, 4
-	cmp	DWORD PTR [ebp+8], 1 # arg1 ? 1
-	jle	L29 # if arg1 <= 1
+	cmp	DWORD PTR [ebp+8], 1
+	jle	L29
 	mov	DWORD PTR [esp], OFFSET FLAT:LC14
 	call	_puts
 	jmp	L31
@@ -557,7 +557,7 @@ _main:
 	and	edx, 31 # edx = edx and 0000000000011111 => keeps 5 LSB bits
 	sub	edx, eax #  edx - F or 0
 	mov	eax, edx # eax = edx - F or 0
-	mov	DWORD PTR _divider, eax # I think it tell to put eax at [80]
+	mov	DWORD PTR _divider, eax # I think it tells to put eax at [80]
 	mov	eax, 0
 	leave
 	ret
