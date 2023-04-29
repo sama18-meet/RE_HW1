@@ -27,6 +27,8 @@ _main:
 	call	___main
 	mov	DWORD PTR [esp], 0
 	call	_time
+	mov	DWORD PTR [esp], eax # wasnt here before
+	call	_srand # wasnt here before 
 	call	_rand # rand(void) - returns a random num between 0 and 32767
 	mov	ecx, 100
 	cdq
@@ -41,7 +43,7 @@ L2:
 	mov	DWORD PTR [esp+4], esi
 	mov	DWORD PTR [esp], OFFSET FLAT:LC2
 	call	_scanf
-	cmp	ebx, DWORD PTR [ebp-12]
+	cmp	ebx, DWORD PTR [ebp-12] 
 	jge	L3 # Second mistake jge L2
 	mov	DWORD PTR [esp], OFFSET FLAT:LC3
 	jmp	L7
